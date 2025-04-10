@@ -1,0 +1,28 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <title>$title$</title>
+    <link rel="stylesheet" href="$css$">
+    $if(math)$
+      $math$
+    $endif$
+  </head>
+  <body>
+    <header>
+      <p><a href="index.html">← index</a></p>
+      <h1 class"title">$title$</h1>
+      <p class="date">$date-meta$</p>
+    </header>
+
+    $if(toc)$
+      <nav id="toc">
+        $toc$
+      </nav>
+    $endif$
+
+    <main>
+      $body$
+    </main>
+  </body>
+</html>
