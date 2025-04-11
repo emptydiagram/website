@@ -75,4 +75,71 @@ To compute the width of a DAG, we simply need a way to efficiently compute the m
 
 It turns out that the [Hopcroft-Karp algorithm](https://en.wikipedia.org/wiki/Hopcroft%E2%80%93Karp_algorithm) (see also [here](https://algorithms.discrete.ma.tum.de/graph-algorithms/matchings-hopcroft-karp/index_en.html)) does exactly this, and it runs in worst-case $O(|E| \sqrt{|V|})$ time. My particular use case involves analyzing the [BlueSky](https://bsky.social) post graph, where each node can have at most two edges. This means $|E| = O(2 |V|)$, so it runs in worst-case $O(|V|^1.5)$, which isn't too terrible!
 
-TODO: describe
+Important to the algorithm is the idea of an augmenting path. If you recall in Figure 3 there was a matching that was maximal but not maximum: we had to delete some of the edges in the matching in order to find a bigger matching. An augmenting path enables this kind of operation: it's a path that starts at a free node (a node that is not part of any pair in the matching), ends at a free node, and for which the edges alternate (free edge, matching edge, free edge, ...). Finding an augmenting path always increases the size of the matching: for every matching edge in the path, you remove it from the current matching, and for every free edge you add it to the current matching. There are, by construction, 1 more free edge than matching edge, so integrating an augmenting path always increases the matching size by one.
+
+The algorithm doesn't just find one augmenting path, it finds as many as possible: a *maximal* set of augmenting paths, which are vertex-disjoint from each other. The high-level pseudocode looks like this:
+
+Hopcroft-Karp(B):
+
+ - $M \leftarrow \emptyset$
+ - while there is an augmenting path in $B$:
+    - $P \leftarrow \text{maximal set of vertex-disjoint shortest augmenting paths}$
+    - $M \leftarrow M \oplus P$
+
+The $\oplus$ symbol above is the [symmetric difference](https://en.wikipedia.org/wiki/Symmetric_difference) operator on sets.
+
+Note that the requirement that we find the shortest augmenting paths is reminiscent of the [Edmonds-Karp](https://en.wikipedia.org/wiki/Edmonds%E2%80%93Karp_algorithm) maximum flow algorithm. Because we want to find the shortest path, we first run a modified BFS starting from free nodes in $L$. This sorts the graph into layers, which is used subsequently by multiple runs of DFS, again starting from free nodes in $L$, to find the set of augmenting paths. Rough Python code is shown below:
+
+
+```python
+from collections import deque
+
+def hopcroft_karp(L, R, G):
+    matching = {}
+    dist = {}
+
+    def bfs():
+        q = deque()
+
+        for n in L:
+            if n not in matching:
+                q.append(n)
+                dist[n] = 0
+            else:
+                dist[n] = float('inf')
+
+        aug_path_found = False
+        aug_path_length = float('inf')
+        while q:
+            v = q.popleft()
+            if dist[v] >= aug_path_length:
+                break
+            for n in G.get(v, []):
+                # if n is free, we found an augmenting path
+                n_partner = matching.get(n, None)
+                if n_partner is None:
+                    aug_path_length = dist[v] + 1
+                    aug_path_found = True
+                elif dist.get(n_partner, float('inf')) == float('inf'):
+                    q.append(n_partner)
+                    dist[n_partner] = dist[v] + 1
+        return aug_path_found
+
+    def dfs(u):
+        for n in G.get(u, []):
+            n_partner = matching.get(n, None)
+            if n_partner is None or (dist.get(n_partner, float('inf')) == dist[u] + 1 and dfs(n_partner)):
+                matching[u] = n
+                matching[n] = u
+                return True
+        return False
+
+    matching_size = 0
+    while bfs():
+        for v in L:
+            if v not in matching:
+                if dfs(v):
+                    matching_size += 1
+    print(f"{matching_size=}")
+    return matching
+```
