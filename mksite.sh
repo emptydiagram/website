@@ -10,7 +10,7 @@ ASSETS_DIR="assets"
 rm -rf "$OUTPUT_DIR/*"
 mkdir -p "$OUTPUT_DIR"
 
-echo "<html><head><link rel='stylesheet' type='text/css' href='$CSS_FILE_NAME' /></head><body><main><h1>$BLOG_NAME</h1><ul>" > "$INDEX_FILE"
+echo "<html><head><title>$BLOG_NAME</title><link rel='stylesheet' type='text/css' href='$CSS_FILE_NAME' /></head><body><main><h1>$BLOG_NAME</h1><ul>" > "$INDEX_FILE"
 
 if [ -e "$CSS_FILE_NAME" ]; then
     cp $CSS_FILE_NAME $OUTPUT_DIR/$CSS_FILE_NAME

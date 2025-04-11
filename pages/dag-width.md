@@ -1,6 +1,6 @@
 ---
 title: How to compute the width of a DAG
-date: 2025-04-10
+date: 2025-04-11
 ---
 
 # Antichains and Dilworth's Theorem
