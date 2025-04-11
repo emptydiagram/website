@@ -10,7 +10,7 @@ ASSETS_DIR="assets"
 rm -rf "$OUTPUT_DIR/*"
 mkdir -p "$OUTPUT_DIR"
 
-echo "<html><head><link rel='stylesheet' type='text/css' href='$CSS_FILE_NAME' /></head><body><h1>$BLOG_NAME</h1><ul>" > "$INDEX_FILE"
+echo "<html><head><link rel='stylesheet' type='text/css' href='$CSS_FILE_NAME' /></head><body><main><h1>$BLOG_NAME</h1><ul>" > "$INDEX_FILE"
 
 if [ -e "$CSS_FILE_NAME" ]; then
     cp $CSS_FILE_NAME $OUTPUT_DIR/$CSS_FILE_NAME
@@ -36,6 +36,6 @@ for mdfile in "$INPUT_DIR"/*.md; do
 	echo "<li><a href='$filename.html'>$title</a> ($date)</li>" >> "$INDEX_FILE"
 done
 
-echo "</ul></body></html>" >> "$INDEX_FILE"
+echo "</ul><main></body></html>" >> "$INDEX_FILE"
 
 echo "Conversion completed. Index file generated at $INDEX_FILE"

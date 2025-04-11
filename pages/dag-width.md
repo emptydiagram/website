@@ -128,7 +128,9 @@ def hopcroft_karp(L, R, G):
     def dfs(u):
         for n in G.get(u, []):
             n_partner = matching.get(n, None)
-            if n_partner is None or (dist.get(n_partner, float('inf')) == dist[u] + 1 and dfs(n_partner)):
+            on_aug_path = n_partner is None or (dist.get(n_partner, float('inf')) == dist[u] + 1
+                and dfs(n_partner))
+            if on_aug_path:
                 matching[u] = n
                 matching[n] = u
                 return True
