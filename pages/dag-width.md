@@ -5,7 +5,7 @@ date: 2025-04-10
 
 # Antichains and Dilworth's Theorem
 
-There's lots of different possible definitions of "width" for a directed acyclic graph. For an app I'm developing, I wanted a simple way to measure how far from linear a DAG is, with the constraint that it generalizes my intuition that the width of a directed tree is the number of leaves. The definition I settled on is the **maximum antichain size**, where an **antichain** for a DAG $G$ is any set of nodes $S$ such that for any distinct pair $u, v \in S$, $u \neq v$, there is no path from $u$ to $v$ in $G$.
+There's lots of different possible definitions of "width" for a directed acyclic graph. For an app I'm developing, I wanted a simple way to measure how far from linear a DAG is, with the constraint that it generalizes my intuition that the width of a directed tree is the number of leaves. The definition I settled on is the *maximum antichain size*, where an [antichain](https://en.wikipedia.org/wiki/Antichain) for a DAG $G$ is any set of nodes $S$ such that for any distinct pair $u, v \in S$, $u \neq v$, there is no path from $u$ to $v$ in $G$.
 
 Okay, so how can this maximum-size antichain be found? First, we need [Dilworth's theorem](https://en.wikipedia.org/wiki/Dilworth%27s_theorem), which states:
 
