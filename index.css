@@ -1,9 +1,7 @@
-body {
-}
-
 main {
-    max-width: 50rem;
+    max-width: 55rem;
     margin: 0 auto;
+    display: block;
 }
 
 pre code {
@@ -12,4 +10,10 @@ pre code {
     padding: 1rem;
     margin: 1rem 0;
     font-size: 1.1em;
+}
+
+main figure {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
 }

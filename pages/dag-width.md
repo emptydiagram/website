@@ -17,7 +17,7 @@ We should also be specific about the second part of the theorem: the "chain cove
 
 For example, I've drawn a DAG below as well as a minimum-size chain decomposition of size 3. This isn't the only such chain decomposition, but there are no smaller decompositions. Note also that an antichain of size 3 is highlighted in red.
 
-![Figure 1: DAG with a chain decomposition of size 3. An antichain of size 3 is highlighted in red.](assets/dag-width-chain-decomp.png)
+![Figure 1: DAG with a chain decomposition of size 3. An antichain of size 3 is highlighted in red.](assets/images/dag-width-chain-decomp.png)
 
 So thanks to Dilworth's theorem, we just need to find the minimum size of a chain decomposition
 
@@ -29,7 +29,7 @@ We also need the notion of turning a DAG into a bipartite graph. This is done by
 
 As an example, the above graph is transformed into this bipartite graph:
 
-![Figure 2: The previous DAG transformed into a bipartite graph](assets/dag-width-bipartite-graph.png)
+![Figure 2: The previous DAG transformed into a bipartite graph](assets/images/dag-width-bipartite-graph.png)
 
 We bring the previous two ideas together with a third idea: a [matching](https://en.wikipedia.org/wiki/Matching_(graph_theory)), or independent edge set: a set of edges such that no two edges share the same vertex. It turns out there is a fundamental relationship between vertex-disjoint path covers of a DAG and the maximum cardinality matching of the bipartite graph version of a DAG:
 
@@ -37,11 +37,11 @@ $$\boxed{\text{min vertex-disjoint path cover size of } G = |G.V| - \text{max ma
 
 This is because every edge you add in the matching joins two paths that were previously separate, thereby reducing the number of paths in the path cover by 1. Initially there are |G.V| paths, each of consisting of a single node with no edges in it. Finding a matching of maximum cardinality among all matches is another way of saying you can construct a vertex-disjoint path cover of minimum cardinality.
 
-![Figure 3: The path cover corresponding to a matching](assets/dag-width-bipartite-matching-path-cover-1.png)
+![Figure 3: The path cover corresponding to a matching](assets/images/dag-width-bipartite-matching-path-cover-1.png)
 
 Note that the above matching is non-maximal: we can add $a \to b$ to the matching to reduce the path cover size by 1. After this addition, however, we are stuck and can't add any more edges, so the resulting matching is maximal. But $|G.V| = 8$, and the resulting maximal matching has a size of 4, so the resulting vertex-disjoint path cover has a size of $8 - 4 = 4$. But we already know from Figure 1 that there's a path cover of size 3. Here the bipartite matching that produces it:
 
-![Figure 4: The maximum bipartite matching corresponding to the path cover (chain decomposition) shown in Figure 1.](assets/dag-width-bipartite-matching-path-cover-2.png)
+![Figure 4: The maximum bipartite matching corresponding to the path cover (chain decomposition) shown in Figure 1.](assets/images/dag-width-bipartite-matching-path-cover-2.png)
 
 I included this example just to point out that we will need to be careful when trying to find a maximum matching: if we choose incorrectly, we can get stuck in a locally optimum matching that is not globally optimal.
 
@@ -49,15 +49,15 @@ I included this example just to point out that we will need to be careful when t
 
 What is the max antichain size of the DAG below?
 
-![Figure 5: A DAG](assets/dag-width-graph-2.png)
+![Figure 5: A DAG](assets/images/dag-width-graph-2.png)
 
 It's clearly 2: either $\{a, b\}$ or $\{d, e\}$ work. But look at the corresponding chain decomposition:
 
-![Figure 6: Chain decomp of the DAG in Figure 5. The max antichain is highlighted in red.](assets/dag-width-graph-2.png)
+![Figure 6: Chain decomp of the DAG in Figure 5. The max antichain is highlighted in red.](assets/images/dag-width-graph-2.png)
 
 It may seem counterintuitive at first since we have chains $a \to c \to d$ and $b \to e$, but $b$ and $e$ are not directly connected! However, we have to remember that Dilworth's theorem talks about partially ordered sets, not DAGs. Therefore, the graph we actually care about is the transitive closure graph:
 
-![Figure 7: The transitive closure of the DAG in Figure 5.](assets/dag-width-graph-2-transitive-closure.png)
+![Figure 7: The transitive closure of the DAG in Figure 5.](assets/images/dag-width-graph-2-transitive-closure.png)
 
 Therefore, we form the transitive closure graph $G^\ast$, which is the graph with the same nodes as $G$ and edges $(u, v)$ for all non-trivial paths from $u$ to $v$ in $G$. Since edges in $G^\ast$ correspond to paths in $G$, it's easy to see that paths in $G^\ast$ correspond to [subsequences](https://en.wikipedia.org/wiki/Subsequence) of paths in $G$. In other words, paths in $G^\ast$ are *chains* (totally-ordered subsets) under the DAG ordering.
 
@@ -88,7 +88,28 @@ Hopcroft-Karp(B):
 
 The $\oplus$ symbol above is the [symmetric difference](https://en.wikipedia.org/wiki/Symmetric_difference) operator on sets.
 
-Note that the requirement that we find the shortest augmenting paths is reminiscent of the [Edmonds-Karp](https://en.wikipedia.org/wiki/Edmonds%E2%80%93Karp_algorithm) maximum flow algorithm. Because we want to find the shortest path, we first run a modified BFS starting from free nodes in $L$. This sorts the graph into layers, which is used subsequently by multiple runs of DFS, again starting from free nodes in $L$, to find the set of augmenting paths. Rough Python code is shown below:
+Note that the requirement that we find the shortest augmenting paths is reminiscent of the [Edmonds-Karp](https://en.wikipedia.org/wiki/Edmonds%E2%80%93Karp_algorithm) maximum flow algorithm. Because we want to find the shortest path, we first run a modified BFS starting from free nodes in $L$. This sorts the graph into layers, which is used subsequently by multiple runs of DFS, again starting from free nodes in $L$, to find the set of augmenting paths.
+
+As a quick example, consider this bipartite graph (not from a DAG, just as an illustration):
+
+
+![Figure 8: A bipartite graph](assets/images/dag-width-hopcroft-karp-1.png)
+
+Running BFS, we find augmenting paths of length 1. Since $\{a, b, c, d\}$ are all discovered before we explore from $3$ or $4$, BFS from these starting points terminates immediately. DFS produces the set of augmenting paths $1 \to a$ and $2 \to b$:
+
+
+![Figure 9: Results from running round 1 of Hopcroft-Karp BFS and DFS on the graph](assets/images/dag-width-hopcroft-karp-2.png)
+
+At this point, only $3, 4 \in L$ are free nodes, so we run BFS from these start points. However, BFS from $3$ visits all of $4$'s neighbors first, so it doesn't find any augmenting paths involving $4$. Two possible augmenting paths: $3 \to a \to 1 \to c$ and $3 \to a \to 1 \to d$ are found, and DFS picks the first one:
+
+![Figure 10: Results from running round 2 of Hopcroft-Karp BFS and DFS on the graph](assets/images/dag-width-hopcroft-karp-3.png)
+
+Now $4$ is the only free node in $L$, and BFS produces only one augmenting path, which DFS chooses. Note that we have to undo all previously selected pairs in the match at this point, which is why the augmenting path is so long:
+
+![Figure 11: Results from running round 3 of Hopcroft-Karp BFS and DFS on the graph](assets/images/dag-width-hopcroft-karp-4.png)
+
+
+Rough Python code is shown below:
 
 
 ```python
