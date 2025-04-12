@@ -53,7 +53,7 @@ What is the max antichain size of the DAG below?
 
 It's clearly 2: either $\{a, b\}$ or $\{d, e\}$ work. But look at the corresponding chain decomposition:
 
-![Figure 6: Chain decomp of the DAG in Figure 5. The max antichain is highlighted in red.](assets/images/dag-width-graph-2.png)
+![Figure 6: Chain decomp of the DAG in Figure 5. The max antichain is highlighted in red.](assets/images/dag-width-graph-2-chain-decomp.png)
 
 It may seem counterintuitive at first since we have chains $a \to c \to d$ and $b \to e$, but $b$ and $e$ are not directly connected! However, we have to remember that Dilworth's theorem talks about partially ordered sets, not DAGs. Therefore, the graph we actually care about is the transitive closure graph:
 
