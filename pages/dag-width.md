@@ -1,6 +1,6 @@
 ---
 title: How to compute the width of a DAG
-date: 2025-04-11
+date: 2025-04-14
 ---
 
 # Antichains and Dilworth's Theorem
@@ -13,7 +13,7 @@ Okay, so how can this maximum-size antichain be found? First, we need [Dilworth'
 
 The theorem is talking about partially ordered sets (posets), not DAGs, but this works for our purpose because every DAG is secretly a poset: just take the [transitive closure](https://en.wikipedia.org/wiki/Transitive_closure) of the edge relation, and you get a [strict partial order](https://en.wikipedia.org/wiki/Partially_ordered_set#Strict_partial_orders). Using this partial ordering language, another way to define an antichain is any set of nodes that are mutually [incomparable](https://en.wikipedia.org/wiki/Comparability) under the DAG ordering.
 
-We should also be specific about the second part of the theorem: the "chain cover", or more precisely **chain decomposition**, is a partition of the node set into a collection of [chains](https://en.wikipedia.org/wiki/Total_order#Chains) or totally ordered subsets.
+We should also be specific about the second part of the theorem: the "chain cover", or more precisely *chain decomposition*, is a partition of the node set into a collection of [chains](https://en.wikipedia.org/wiki/Total_order#Chains) or totally ordered subsets.
 
 For example, I've drawn a DAG below as well as a minimum-size chain decomposition of size 3. This isn't the only such chain decomposition, but there are no smaller decompositions. Note also that an antichain of size 3 is highlighted in red.
 
@@ -59,7 +59,7 @@ It may seem counterintuitive at first since we have chains $a \to c \to d$ and $
 
 ![Figure 7: The transitive closure of the DAG in Figure 5.](assets/images/dag-width-graph-2-transitive-closure.png)
 
-Therefore, we form the transitive closure graph $G^\ast$, which is the graph with the same nodes as $G$ and edges $(u, v)$ for all non-trivial paths from $u$ to $v$ in $G$. Since edges in $G^\ast$ correspond to paths in $G$, it's easy to see that paths in $G^\ast$ correspond to [subsequences](https://en.wikipedia.org/wiki/Subsequence) of paths in $G$. In other words, paths in $G^\ast$ are *chains* (totally-ordered subsets) under the DAG ordering.
+The transitive closure graph $G^\ast$ is the graph with the same nodes as $G$ and edges $(u, v)$ for all non-trivial paths from $u$ to $v$ in $G$. Now the chains from our previous chain decomposition actually are paths in the transitive closure graph. More generally, since edges in $G^\ast$ correspond to paths in $G$, it's easy to see that paths in $G^\ast$ correspond to [subsequences](https://en.wikipedia.org/wiki/Subsequence) of paths in $G$. In other words, paths in $G^\ast$ are *chains* (totally-ordered subsets) under the DAG ordering.
 
 Now apply the equation from the previous section:
 
@@ -118,6 +118,7 @@ from collections import deque
 def hopcroft_karp(L, R, G):
     matching = {}
     dist = {}
+    inf = float('inf')
 
     def bfs():
         q = deque()
@@ -127,10 +128,10 @@ def hopcroft_karp(L, R, G):
                 q.append(n)
                 dist[n] = 0
             else:
-                dist[n] = float('inf')
+                dist[n] = inf
 
         aug_path_found = False
-        aug_path_length = float('inf')
+        aug_path_length = inf
         while q:
             v = q.popleft()
             if dist[v] >= aug_path_length:
@@ -141,7 +142,7 @@ def hopcroft_karp(L, R, G):
                 if n_partner is None:
                     aug_path_length = dist[v] + 1
                     aug_path_found = True
-                elif dist.get(n_partner, float('inf')) == float('inf'):
+                elif dist.get(n_partner, inf) == inf:
                     q.append(n_partner)
                     dist[n_partner] = dist[v] + 1
         return aug_path_found
@@ -149,7 +150,7 @@ def hopcroft_karp(L, R, G):
     def dfs(u):
         for n in G.get(u, []):
             n_partner = matching.get(n, None)
-            on_aug_path = n_partner is None or (dist.get(n_partner, float('inf')) == dist[u] + 1
+            on_aug_path = n_partner is None or (dist.get(n_partner, inf) == dist[u] + 1
                 and dfs(n_partner))
             if on_aug_path:
                 matching[u] = n
@@ -166,3 +167,12 @@ def hopcroft_karp(L, R, G):
     print(f"{matching_size=}")
     return matching
 ```
+
+# tl;dr
+
+The final procedure is:
+
+ - Given a DAG $G$, take its transitive closure $G^\ast$
+ - Convert $G^\ast$ to a bipartite graph $B$
+ - Run Hopcroft-Karp on $B$ to compute the size of the maximum matching, $m$
+ - Compute $\text{width}(G) = |G.V| - m$
